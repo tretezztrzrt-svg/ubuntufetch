@@ -1,26 +1,29 @@
 #!/usr/bin/env bash
 # ============================================================
-#  ubuntufetch – Kompaktes Systeminfo-Tool für Ubuntu
-#  Stil: Neofetch-ähnlich, aber schlank und Ubuntu-proofed
+#  ubuntufetch – Vollständiges Systeminfo-Tool für Ubuntu
+#  Basierend auf Neofetch, aber optimiert und Ubuntu-proofed
 # ============================================================
 
 # ---------- Farben & Formatierung ----------
 reset='\e[0m'
 bold='\e[1m'
-# Farben: 1=rot, 2=grün, 3=gelb, 4=blau, 5=magenta, 6=cyan, 7=weiß
-title_col="${bold}\e[38;5;39m"    # hellblau
-sub_col="${bold}\e[38;5;45m"      # türkis
-info_col="\e[38;5;255m"           # hellgrau
-colon_col="\e[38;5;244m"          # dunkelgrau
-bar_col_elapsed="\e[38;5;46m"     # grün
-bar_col_total="\e[38;5;240m"      # dunkelgrau
+title_col="${bold}\e[38;5;39m"      # hellblau
+sub_col="${bold}\e[38;5;45m"        # türkis
+info_col="\e[38;5;255m"             # hellgrau
+colon_col="\e[38;5;244m"            # dunkelgrau
+bar_col_elapsed="\e[38;5;46m"       # grün
+bar_col_total="\e[38;5;240m"        # dunkelgrau
+c1="${bold}\e[38;5;39m"             # blau für Logo
+c2="${bold}\e[38;5;45m"             # türkis für Logo
+c3="${bold}\e[38;5;220m"            # gelb für Logo
+c4="${bold}\e[38;5;196m}"           # rot für Logo
 
 # ---------- Hilfsfunktionen ----------
 has_cmd() { command -v "$1" &>/dev/null; }
 trim() { echo -n "$1" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//'; }
 err() { echo -e "${bold}${info_col}⚠️  $*${reset}" >&2; }
 
-# ---------- Systeminformationen sammeln ----------
+# ---------- Informationssammlung (wie Neofetch) ----------
 get_distro() {
     if has_cmd lsb_release; then
         distro="$(lsb_release -ds 2>/dev/null)"
@@ -30,13 +33,14 @@ get_distro() {
     else
         distro="$(uname -s) $(uname -r)"
     fi
-    # Architektur anhängen
     arch="$(uname -m)"
     [[ "$arch" =~ (x86_64|i686|arm64) ]] && distro="$distro $arch"
 }
 
 get_host() { hostname="$(hostname)"; }
+
 get_kernel() { kernel="$(uname -r)"; }
+
 get_uptime() {
     if [[ -f /proc/uptime ]]; then
         s=$(cut -d. -f1 /proc/uptime)
@@ -45,7 +49,9 @@ get_uptime() {
         now="$(date +%s)"
         s="$((now - boot))"
     fi
-    d="$((s/86400))"; h="$(((s%86400)/3600))"; m="$(((s%3600)/60))"
+    d="$((s/86400))"
+    h="$(((s%86400)/3600))"
+    m="$(((s%3600)/60))"
     uptime=""
     ((d>0)) && uptime+="${d}d "
     ((h>0)) && uptime+="${h}h "
@@ -99,7 +105,6 @@ get_de() {
 
 get_wm() {
     if [[ -n "$XDG_CURRENT_DESKTOP" ]] && [[ "$XDG_SESSION_TYPE" = wayland ]]; then
-        # Wayland compositor
         wm="$(echo "$XDG_CURRENT_DESKTOP" | tr '[:upper:]' '[:lower:]')"
     elif has_cmd xprop && [[ -n "$DISPLAY" ]]; then
         wm="$(xprop -root -notype _NET_SUPPORTING_WM_CHECK 2>/dev/null | awk -F'"' '{print $2}')"
@@ -107,15 +112,21 @@ get_wm() {
     [[ -z "$wm" ]] && wm="n/a"
 }
 
-get_theme_icons() {
+get_theme() {
     if has_cmd gsettings; then
         theme="$(gsettings get org.gnome.desktop.interface gtk-theme 2>/dev/null | tr -d "'")"
-        icons="$(gsettings get org.gnome.desktop.interface icon-theme 2>/dev/null | tr -d "'")"
     elif has_cmd xfconf-query; then
         theme="$(xfconf-query -c xsettings -p /Net/ThemeName 2>/dev/null)"
-        icons="$(xfconf-query -c xsettings -p /Net/IconThemeName 2>/dev/null)"
     fi
     [[ -z "$theme" ]] && theme="n/a"
+}
+
+get_icons() {
+    if has_cmd gsettings; then
+        icons="$(gsettings get org.gnome.desktop.interface icon-theme 2>/dev/null | tr -d "'")"
+    elif has_cmd xfconf-query; then
+        icons="$(xfconf-query -c xsettings -p /Net/IconThemeName 2>/dev/null)"
+    fi
     [[ -z "$icons" ]] && icons="n/a"
 }
 
@@ -131,7 +142,8 @@ get_cpu() {
     [[ -z "$cpu_model" ]] && cpu_model="$(grep -m1 'model name' /proc/cpuinfo | cut -d: -f2-)"
     cores="$(nproc 2>/dev/null)"
     [[ -z "$cores" ]] && cores="$(grep -c '^processor' /proc/cpuinfo)"
-    # Temp
+    
+    # CPU-Temperatur
     if [[ -d /sys/class/thermal/thermal_zone0 ]]; then
         temp_raw="$(cat /sys/class/thermal/thermal_zone0/temp 2>/dev/null)"
         if [[ -n "$temp_raw" ]]; then
@@ -139,7 +151,8 @@ get_cpu() {
             [[ "$temp_c" -gt 0 ]] && cpu_temp=" [${temp_c}°C]"
         fi
     fi
-    # Speed
+    
+    # CPU-Takt
     speed_file="/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq"
     if [[ -f "$speed_file" ]]; then
         speed="$(($(< "$speed_file") / 1000))"
@@ -151,6 +164,7 @@ get_cpu() {
     else
         speed=""
     fi
+    
     cpu="$cpu_model (${cores})${cpu_temp:+ $cpu_temp}${speed:+ @ $speed}"
 }
 
@@ -185,7 +199,6 @@ get_disk() {
 }
 
 get_local_ip() {
-    # Default route interface
     iface="$(ip route | awk '/default/ {print $5; exit}')"
     if [[ -n "$iface" ]]; then
         ip_addr="$(ip -4 addr show "$iface" | awk '/inet / {print $2; exit}')"
@@ -194,12 +207,9 @@ get_local_ip() {
     [[ -z "$ip_addr" ]] && ip_addr="n/a"
 }
 
-# ---------- ASCII Logo ----------
+# ---------- ASCII-Logo (Ubuntu) ----------
 print_ascii() {
-    # Kurzes Logo für Ubuntu und einige andere; falls unbekannt, generisches Linux
-    case "$distro" in
-        *"Ubuntu"*)
-            cat <<'EOF'
+    cat <<'EOF'
 ${c1}            .-/+oossssoo+\-.
         ´:+ssssssssssssssssss+:`
       -+ssssssssssssssssssyyssss+-
@@ -221,121 +231,11 @@ oss${c2}yNMMMNyMMh${c1}sssssssssssssshmmmh${c1}ssssssso
         `:+ssssssssssssssssss+:`
             .-\+oossssoo+/-.
 EOF
-        ;;
-        *"Debian"*)
-            cat <<'EOF'
-${c1}       _,met$$$$$gg.
-    ,g$$$$$$$$$$$$$$$P.
-  ,g$$P"        """Y$$.".
- ,$$P'              `$$$.
-',$$P       ,ggs.     `$$b:
-`d$$'     ,$P"'   ${c2}.${c1}    $$$
- $$P      d$'     ${c2},${c1}    $$P
- $$:      $$.   ${c2}-${c1}    ,d$$'
- $$;      Y$b._   _,d$P'
- Y$$.    ${c2}`.${c1}`"Y$$P"'
-${c1} `$$b      ${c2}"-.__
-${c1}  `Y$$
-   `Y$$.
-     `$$b.
-       `Y$$b.
-          `"Y$b._
-              `"""
-EOF
-        ;;
-        *"Fedora"*)
-            cat <<'EOF'
-${c1}             .',;::::;,'.
-         .';:cccccccccccc:;,.     
-      .;cccccccccccccccccccccc;.
-    .:cccccccccccccccccccccccccc:.
-  .;ccccccccccccc;${c2}.:dddl:.${c1};ccccccc;.
- .:ccccccccccccc;${c2}OWMKOOXMWd${c1};ccccccc:.
-.:ccccccccccccc;${c2}KMMc${c1};cc;${c2}xMMc${c1};ccccccc:.
-,cccccccccccccc;${c2}MMM.${c1};cc;${c2};WW:${c1};cccccccc,
-:cccccccccccccc;${c2}MMM.${c1};cccccccccccccccc:
-:ccccccc;${c2}oxOOOo${c1};${c2}MMM0OOk.${c1};cccccccccccc:
-cccccc;${c2}0MMKxdd:${c1};${c2}MMMkddc.${c1};cccccccccccc;
-ccccc;${c2}XM0'${c1};cccc;${c2}MMM.${c1};cccccccccccccccc'
-ccccc;${c2}MMo${c1};ccccc;${c2}MMW.${c1};ccccccccccccccc;
-ccccc;${c2}0MNc.${c1}ccc${c2}.xMMd${c1};ccccccccccccccc;
-cccccc;${c2}dNMWXXXWM0:${c1};cccccccccccccc:,
-cccccccc;${c2}.:odl:.${c1};cccccccccccccc:,.
-:cccccccccccccccccccccccccccc:'.
-.:cccccccccccccccccccccc:;,..
-  '::cccccccccccccc::;,.
-EOF
-        ;;
-        *"Arch"*)
-            cat <<'EOF'
-${c1}                   -`
-                  .o+`
-                 `ooo/
-                `+oooo:
-               `+oooooo:
-               -+oooooo+:
-             `/:-:++oooo+:
-            `/++++/+++++++:
-           `/++++++++++++++:
-          `/+++o${c2}oooooooo${c1}oooo/`
-${c2}         ${c1}./${c2}ooosssso++osssssso${c1}+`
-${c2}        .oossssso-````/ossssss+`
-       -osssssso.      :ssssssso.
-      :osssssss/        osssso+++.
-     /ossssssss/        +ssssooo/-
-   `/ossssso+/:-        -:/+osssso+-
-  `+sso+:-`                 `.-/+oso:
- `++:.                           `-/+/
- .`                                 `/
-EOF
-        ;;
-        *"Manjaro"*)
-            cat <<'EOF'
-${c1}██████████████████  ████████
-██████████████████  ████████
-██████████████████  ████████
-██████████████████  ████████
-████████            ████████
-████████  ████████  ████████
-████████  ████████  ████████
-████████  ████████  ████████
-████████  ████████  ████████
-████████  ████████  ████████
-████████  ████████  ████████
-████████  ████████  ████████
-████████  ████████  ████████
-████████  ████████  ████████
-EOF
-        ;;
-        *)
-            # Generisches Linux-Logo
-            cat <<'EOF'
-${c2}        #####
-${c2}       #######
-${c2}       ##${c1}O${c2}#${c1}O${c2}##
-${c2}       #${c3}#####${c2}#
-${c2}     ##${c1}##${c3}###${c1}##${c2}##
-${c2}    #${c1}##########${c2}##
-${c2}   #${c1}############${c2}##
-${c2}   #${c1}############${c2}###
-${c3}  ##${c2}#${c1}###########${c2}##${c3}#
-${c3}######${c2}#${c1}#######${c2}#${c3}######
-${c3}#######${c2}#${c1}#####${c2}#${c3}#######
-${c3}  #####${c2}#######${c3}#####
-EOF
-        ;;
-    esac
 }
 
 # ---------- Hauptausgabe ----------
 main() {
-    # Farben für ASCII-Logo setzen (feste Farben)
-    c1="${bold}\e[38;5;39m"   # blau
-    c2="${bold}\e[38;5;45m"   # türkis
-    c3="${bold}\e[38;5;220m"  # gelb
-    c4="${bold}\e[38;5;196m}" # rot
-
-    # Informationen sammeln
+    # Alle Informationen sammeln
     get_distro
     get_host
     get_kernel
@@ -345,7 +245,8 @@ main() {
     get_resolution
     get_de
     get_wm
-    get_theme_icons
+    get_theme
+    get_icons
     get_term
     get_cpu
     get_gpu
@@ -353,10 +254,17 @@ main() {
     get_disk
     get_local_ip
 
-    # Ausgabe – max. Breite berechnen (für Alignment)
+    # Ausgabe
+    echo -e "${title_col}${bold}$(hostname) System Information${reset}"
+    echo -e "${sub_col}${bold}$distro${reset}\n"
+
+    # ASCII-Logo
+    print_ascii
+
+    # Info-Zeilen mit automatischem Alignment
     max_len=0
-    declare -A lines
-    lines=(
+    declare -A info_lines
+    info_lines=(
         ["OS"]="$distro"
         ["Host"]="$hostname"
         ["Kernel"]="$kernel"
@@ -376,30 +284,19 @@ main() {
         ["Local IP"]="$ip_addr"
     )
 
-    # Länge der längsten Überschrift ermitteln
-    for key in "${!lines[@]}"; do
+    for key in "${!info_lines[@]}"; do
         len="${#key}"
         (( len > max_len )) && max_len="$len"
     done
-    # Spaltenbreite: Überschrift + 2 Leerzeichen + Doppelpunkt
     col_width="$((max_len + 2))"
 
-    # Ausgabe auf Terminal (mit Farben)
-    echo -e "${title_col}${bold}$(hostname) System Info${reset}"
-    echo -e "${sub_col}${bold}$distro${reset}\n"
-
-    # ASCII-Logo ausgeben (optional)
-    print_ascii
-
-    # Info-Zeilen ausgeben
     for key in "OS" "Host" "Kernel" "Uptime" "Packages" "Shell" "Resolution" "DE" "WM" "Theme" "Icons" "Terminal" "CPU" "GPU" "Memory" "Disk (/)" "Local IP"; do
-        value="${lines[$key]}"
-        # Führende/trailing Whitespace entfernen
+        value="${info_lines[$key]}"
         value="$(trim "$value")"
         printf "${sub_col}%-${col_width}s${colon_col}:${info_col} %s${reset}\n" "$key" "$value"
     done
 
-    echo -e "\n${bold}${info_col}Report generated: $(date '+%Y-%m-%d %H:%M:%S')${reset}"
+    echo -e "\n${bold}${info_col}Generated: $(date '+%Y-%m-%d %H:%M:%S')${reset}"
 }
 
 # ---------- Start ----------
