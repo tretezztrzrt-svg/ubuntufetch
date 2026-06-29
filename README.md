@@ -1,29 +1,19 @@
 # ubuntufetch
-neonfetch -but new in ubuntu 26.04
+neonfetch - but new in ubuntu 26.04
 
 🚀 Verwendung
 
 Speichern Sie das Skript z.B. als ubuntufetch und machen Sie es ausführbar:
-bash
-
-chmod +x ubuntufetch
-
-Ausführen (kein sudo nötig):
-bash
-
-./ubuntufetch
-Optional können Sie es in Ihr $PATH‑Verzeichnis legen (z.B. ~/.local/bin/).
 
 # Skript speichern und ausführbar machen
-chmod +x ubuntufetch
+# chmod +x ubuntufetch.sh
 
 # Ausführen (kein sudo nötig)
-./ubuntufetch
+# ./ubuntufetch.sh
 
 📊 Was das Skript liefert
+
 <img width="433" height="400" alt="grafik" src="https://github.com/user-attachments/assets/a22b60b5-e2c2-40de-89b9-c4ce7799a085" />
-
-
 
 🔧 Anpassungen
 
