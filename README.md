@@ -21,24 +21,8 @@ chmod +x ubuntufetch
 ./ubuntufetch
 
 📊 Was das Skript liefert
-Info	Quelle
-OS	lsb_release + Architektur
-Host	hostname
-Kernel	uname -r
-Uptime	/proc/uptime
-Packages	dpkg-query
-Shell	$SHELL + Version
-Resolution	xrandr
-DE	$XDG_CURRENT_DESKTOP u.a.
-WM	xprop oder Wayland
-Theme	gsettings
-Icons	gsettings
-Terminal	$TERM_PROGRAM
-CPU	lscpu + Temperatur + Takt
-GPU	lspci
-Memory	/proc/meminfo
-Disk (/)	df -h /
-Local IP	ip route + ip addr
+
+
 
 🔧 Anpassungen
 
