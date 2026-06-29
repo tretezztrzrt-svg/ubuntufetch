@@ -15,20 +15,25 @@ neonfetch -but new in ubuntu 26.04
 
     Optional können Sie es in Ihr $PATH‑Verzeichnis legen (z.B. ~/.local/bin/).
 
-✨ Was das Skript bietet
-
-    Alle wichtigen Systeminfos auf einen Blick.
-
-    Farbige, übersichtliche Ausgabe mit automatischem Alignment.
-
-    Fehlertoleranz – fehlende Befehle (z.B. xrandr, gsettings) führen nicht zum Abbruch, sondern zeigen „n/a“.
-
-    ASCII-Logo für Ubuntu, Debian, Fedora, Arch, Manjaro und ein generisches Linux-Logo.
-
-    Kompakt – nur ca. 250 Zeilen, leicht erweiterbar.
-
-    Keine Abhängigkeiten außer den Standard‑Ubuntu‑Tools (die meisten sind ohnehin installiert).
-
+📊 Was das Skript liefert
+    Info	Quelle
+    OS	lsb_release + Architektur
+    Host	hostname
+    Kernel	uname -r
+    Uptime	/proc/uptime
+    Packages	dpkg-query
+    Shell	$SHELL + Version
+    Resolution	xrandr
+    DE	$XDG_CURRENT_DESKTOP u.a.
+    WM	xprop oder Wayland
+    Theme	gsettings
+    Icons	gsettings
+    Terminal	$TERM_PROGRAM
+    CPU	lscpu + Temperatur + Takt
+    GPU	lspci
+    Memory	/proc/meminfo
+    Disk (/)	df -h /
+    Local IP	ip route + ip addr
 🔧 Anpassungen
 
     Logo aus-/einschalten: Kommentieren Sie den Aufruf print_ascii in der main()‑Funktion aus, wenn Sie kein Logo möchten.
