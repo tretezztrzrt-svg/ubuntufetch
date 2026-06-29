@@ -21,6 +21,7 @@ chmod +x ubuntufetch
 ./ubuntufetch
 
 📊 Was das Skript liefert
+<img width="433" height="400" alt="grafik" src="https://github.com/user-attachments/assets/a22b60b5-e2c2-40de-89b9-c4ce7799a085" />
 
 
 
