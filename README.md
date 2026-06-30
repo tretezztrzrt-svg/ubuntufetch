@@ -1,23 +1,65 @@
-# ubuntufetch
-neonfetch - but new in ubuntu 26.04
+ubuntufetch
 
-🚀 Verwendung
-Speichern Sie das Skript z.B. als ubuntufetch und machen Sie es ausführbar:
+A minimal system‑fetch tool for Ubuntu 26.04 — inspired by neonfetch, but focused on clean output without ASCII noise.
+🚀 Usage
+bash
 
-Skript speichern und ausführbar machen
 chmod +x ubuntufetch.sh
-
-Ausführen (kein sudo nötig)
 ./ubuntufetch.sh
 
-📊 Was das Skript liefert
+No sudo required.
+📊 What it shows
 
-<img width="433" height="400" alt="grafik" src="https://github.com/user-attachments/assets/a22b60b5-e2c2-40de-89b9-c4ce7799a085" />
+    Hostname
 
-🔧 Anpassungen
+    Kernel
 
-Logo aus-/einschalten: Kommentieren Sie den Aufruf print_ascii in der main()‑Funktion aus, wenn Sie kein Logo möchten.
-Weitere Distributionen: Fügen Sie einfach einen neuen Fall in der case‑Anweisung im print_ascii‑Block hinzu.
-Farben: Passen Sie die Variablen am Anfang des Skripts an (ANSI‑Codes).
+    Uptime
 
-Ja, der Ascii-Müll ist aus, straight infos no waste
+    Shell
+
+    CPU / RAM
+
+    Disk usage
+
+    Package count
+
+    Desktop / WM
+
+    GPU
+
+    Network info
+
+🔧 Customization
+Toggle ASCII logo
+
+In main(), comment out the call to
+bash
+
+print_ascii
+
+to disable the logo.
+Add more distributions
+
+Extend the case block inside print_ascii:
+bash
+
+case "$DISTRO" in
+    ubuntu)  print_ubuntu ;;
+    debian)  print_debian ;;
+    arch)    print_arch ;;
+esac
+
+Adjust colors
+
+Modify the ANSI color variables at the top of the script:
+bash
+
+RED="\e[31m"
+GREEN="\e[32m"
+BLUE="\e[34m"
+RESET="\e[0m"
+
+🎯 Goal
+
+Provide straight system info, no ASCII clutter, no wasted space — just a fast, lightweight fetch tool for Ubuntu users who prefer clean output.
