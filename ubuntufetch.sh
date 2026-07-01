@@ -4,19 +4,19 @@
 #  Basierend auf Neofetch, aber optimiert und Ubuntu-proofed
 # ============================================================
 
-# ---------- Farben & Formatierung ----------
+# ---------- Farben & Formatierung (nur Ubuntu-Farben) ----------
 reset='\e[0m'
 bold='\e[1m'
-title_col="${bold}\e[38;5;39m"      # hellblau
-sub_col="${bold}\e[38;5;45m"        # türkis
-info_col="\e[38;5;255m"             # hellgrau
-colon_col="\e[38;5;244m"            # dunkelgrau
-bar_col_elapsed="\e[38;5;46m"       # grün
-bar_col_total="\e[38;5;240m"        # dunkelgrau
-c1="${bold}\e[38;5;39m"             # blau für Logo
-c2="${bold}\e[38;5;45m"             # türkis für Logo
-c3="${bold}\e[38;5;220m"            # gelb für Logo
-c4="${bold}\e[38;5;196m}"           # rot für Logo
+title_col="${bold}\e[38;5;202m"      # Ubuntu-Orange
+sub_col="${bold}\e[38;5;90m"        # Ubuntu-Lila
+info_col="\e[38;5;255m"             # Weiß
+colon_col="\e[38;5;244m"            # Dunkelgrau
+bar_col_elapsed="\e[38;5;202m"      # Orange (falls verwendet)
+bar_col_total="\e[38;5;240m"        # Dunkelgrau
+c1="${bold}\e[38;5;202m"            # Orange für Logo
+c2="${bold}\e[38;5;208m"            # Helleres Orange
+c3="${bold}\e[38;5;90m"             # Lila
+c4="${bold}\e[38;5;129m"            # Helleres Lila
 
 # ---------- Hilfsfunktionen ----------
 has_cmd() { command -v "$1" &>/dev/null; }
@@ -207,9 +207,10 @@ get_local_ip() {
     [[ -z "$ip_addr" ]] && ip_addr="n/a"
 }
 
-# ---------- ASCII-Logo (Ubuntu) ----------
+# ---------- ASCII-Logo (Ubuntu) – hier kann später ein Logo in Ubuntu-Farben eingefügt werden ----------
 # print_ascii() {
 # }
+
 # ---------- Hauptausgabe ----------
 main() {
     # Alle Informationen sammeln
@@ -235,7 +236,7 @@ main() {
     echo -e "${title_col}${bold}$(hostname) System Information${reset}"
     echo -e "${sub_col}${bold}$distro${reset}\n"
 
-    # ASCII-Logo
+    # ASCII-Logo (optional)
     # print_ascii
 
     # Info-Zeilen mit automatischem Alignment
